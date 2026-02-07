@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2020", // Modern JS features
+    "lib": ["dom", "dom.iterable", "esnext"], // DOM + latest JS
+    "allowJs": true, // Allow JS files
+    "skipLibCheck": true, // Skip type checking of node_modules
+    "strict": true, // Enable all strict type-checking options
+    "noEmit": true, // TS won't emit compiled files (Next.js handles this)
+    "esModuleInterop": true, // For CommonJS compatibility
+    "module": "ESNext", // Use modern ES modules
+    "moduleResolution": "bundler", // Optimized for bundlers like Next.js
+    "resolveJsonModule": true, // Allow importing JSON files
+    "isolatedModules": true, // Required for Next.js
+    "jsx": "react-jsx", // Automatic JSX runtime
+    "incremental": true, // Enable incremental compilation
+    "plugins": [
+      { "name": "next" } // Next.js TS plugin
+    ],
+    "paths": {
+      "@/*": ["./*"] // Absolute imports
+    },
+    "types": ["node"] // Include node types globally
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "globals.d.ts", // Custom type declarations for CSS, images, etc.
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}

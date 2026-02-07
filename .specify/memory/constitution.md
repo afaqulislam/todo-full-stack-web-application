@@ -1,55 +1,65 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+  Sync Impact Report:
+  - Version change: 0.0.0 → 1.0.0 (Initial project setup)
+  - List of modified principles:
+      - [PRINCIPLE_1_NAME] → I. Spec-Driven Development (SDD) Rule
+      - [PRINCIPLE_2_NAME] → II. Modern Tech Stack (FastAPI/Next.js)
+      - [PRINCIPLE_3_NAME] → III. JWT-Based Authentication & Security
+      - [PRINCIPLE_4_NAME] → IV. User-Scoped Data Isolation
+      - [PRINCIPLE_5_NAME] → V. Production-Ready Modular Code
+      - [PRINCIPLE_6_NAME] → VI. Backend Test Commitment
+  - Added sections:
+      - Security Requirements
+      - Development Workflow
+  - Templates requiring updates:
+      - .specify/templates/plan-template.md (✅ updated)
+      - .specify/templates/spec-template.md (✅ updated)
+      - .specify/templates/tasks-template.md (✅ updated)
+  - Follow-up TODOs:
+      - TODO(RATIFICATION_DATE): Finalize launch date.
+-->
+
+# Phase II – Todo Full-Stack Web Application Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Spec-Driven Development (SDD) Rule
+NO manual coding assumptions are permitted. Every implementation detail, API contract, and business rule MUST be derived from finalized specifications. If an requirement is missing, it must be clarified in the spec before code is written.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Modern Tech Stack (FastAPI/Next.js)
+The application architecture is strictly bounded by:
+- **Backend**: FastAPI + SQLModel + Neon PostgreSQL.
+- **Frontend**: Next.js App Router + TypeScript + Tailwind CSS.
+- Abstractions must align with these framework patterns.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. JWT-Based Authentication & Security
+Authentication MUST use Better Auth on the frontend with JWT verification on the backend. Security is non-negotiable; all API routes (except public auth entries) MUST be protected via JWT validation.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. User-Scoped Data Isolation
+Every data operation MUST be user-scoped. Cross-user access is a critical failure. Ownership checks must be enforced at the database/service layer for every request.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Production-Ready Modular Code
+Code must be modular, highly readable, and project-structured for scalability. Avoid monolithic files; prefer service-oriented patterns and clear separation of concerns between models, schemas, and logic.
 
-### [PRINCIPLE_6_NAME]
+### VI. Backend Test Commitment
+Tests are mandatory for all backend logic. No backend feature is considered "done" without corresponding unit or integration tests that verify success and error paths.
 
+## Security Requirements
 
-[PRINCIPLE__DESCRIPTION]
+- **Ownership Integrity**: Every SQL query filtering by ID must also filter by `user_id`.
+- **Secret Management**: Never hardcode tokens or credentials; use `.env` files and environment variables exclusively.
+- **Input Validation**: All external input must be validated via Pydantic/Zod schemas at the system boundary.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Development Workflow
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
-
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
-
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+1. **Spec**: Define feature and acceptance criteria.
+2. **Plan**: Design architecture and data models.
+3. **Tasks**: Break into testable, prioritized increments.
+4. **Implement**: Write code and mandatory backend tests.
+5. **Review**: Ensure compliance with this constitution.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes all other informal practices. Amendments require a version bump and updates to all dependent templates. Compliance is checked during the planning phase of every feature.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: TODO(RATIFICATION_DATE) | **Last Amended**: 2026-01-06

@@ -31,7 +31,12 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [ ] SDD Rule: Derived from spec?
+- [ ] Tech Stack: FastAPI/Next.js/Neon?
+- [ ] Security: JWT Auth/Better Auth/No secrets?
+- [ ] Data Isolation: All operations user-scoped?
+- [ ] Code Quality: Modular/Production-ready?
+- [ ] Testing: Backend test plan included?
 
 ## Project Structure
 
