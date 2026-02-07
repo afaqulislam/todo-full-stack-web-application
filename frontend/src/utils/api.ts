@@ -97,7 +97,7 @@ export const authApi = {
 
       if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
         // This indicates a network/CORS error
-        throw new Error('Network error: Unable to connect to the authentication server. This may be a CORS issue or the backend server is not running. Please check if the backend is running on http://localhost:8000.');
+        throw new Error('Network error: Unable to connect to the authentication server. This may be a CORS issue or the backend server is not running. Please check if the backend is running on.');
       } else if (error.name === 'TypeError') {
         // Other network errors
         throw new Error('Network error: Unable to connect to the server. Please check if the backend is running and accessible.');
@@ -150,7 +150,7 @@ export const authApi = {
 
       if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
         // This indicates a network/CORS error
-        throw new Error('Network error: Unable to connect to the authentication server. This may be a CORS issue or the backend server is not running. Please check if the backend is running on http://localhost:8000.');
+        throw new Error('Network error: Unable to connect to the authentication server. This may be a CORS issue or the backend server is not running. Please check if the backend is running on.');
       } else if (error.name === 'TypeError') {
         // Other network errors
         throw new Error('Network error: Unable to connect to the server. Please check if the backend is running and accessible.');

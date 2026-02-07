@@ -2,7 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from datetime import timedelta
 from ..models.user import UserCreate, UserRead
 from ..services.user_service import UserService
-from ..core.security import authenticate_user, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_current_user_from_cookie
+from ..core.security import (
+    authenticate_user,
+    create_access_token,
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    get_current_user_from_cookie,
+)
 from ..core.database import get_async_session
 from pydantic import BaseModel
 from ..core.config import settings
@@ -14,9 +19,7 @@ router = APIRouter(prefix=f"{settings.api_v1_prefix}/auth", tags=["auth"])
 
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 async def register_user(
-    *,
-    user_create: UserCreate,
-    session: AsyncSession = Depends(get_async_session)
+    *, user_create: UserCreate, session: AsyncSession = Depends(get_async_session)
 ):
     """
     Register a new user account.
@@ -29,7 +32,7 @@ async def register_user(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred during user registration"
+            detail="An error occurred during user registration",
         )
 
 
@@ -42,7 +45,7 @@ class LoginRequest(BaseModel):
 async def login_user(
     response: Response,
     login_request: LoginRequest,
-    session: AsyncSession = Depends(get_async_session)
+    session: AsyncSession = Depends(get_async_session),
 ):
     """
     Login with email and password. Sets JWT in HTTP-only cookie.
@@ -58,7 +61,8 @@ async def login_user(
     # Create access token with user ID and email
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.email, "user_id": str(user.id)}, expires_delta=access_token_expires
+        data={"sub": user.email, "user_id": str(user.id)},
+        expires_delta=access_token_expires,
     )
 
     # Set the token in an HTTP-only cookie with improved attributes for localhost
@@ -66,13 +70,11 @@ async def login_user(
         key="access_token",
         value=access_token,
         httponly=True,
-        secure=False,  # Set to True in production with HTTPS
-        samesite="lax",  # Prevents CSRF attacks - "strict" would be more secure but may cause issues with redirects
-        max_age=1800,  # 30 minutes in seconds
-        path="/",  # Make cookie available for all paths
-        domain=None,  # Use default domain - don't set for localhost to avoid conflicts
+        secure=True,  # REQUIRED
+        samesite="none",  # REQUIRED for localhost → hf.space
+        max_age=1800,
+        path="/",
     )
-
     return {"message": "Login successful", "user_id": str(user.id)}
 
 
@@ -89,9 +91,7 @@ async def logout_user(response: Response):
 
 
 @router.get("/me", response_model=UserRead)
-async def read_users_me(
-    current_user: UserRead = Depends(get_current_user_from_cookie)
-):
+async def read_users_me(current_user: UserRead = Depends(get_current_user_from_cookie)):
     """
     Get current authenticated user details.
     This endpoint ONLY reads from cookies, not from Authorization headers.
