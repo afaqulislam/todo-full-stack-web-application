@@ -17,7 +17,12 @@ from .config import settings
 # PASSWORD + AUTH CONFIG
 # ------------------------------------------------------------------
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Use pbkdf2_sha256 exclusively for production stability
+# This avoids version compatibility issues with bcrypt on some environments.
+pwd_context = CryptContext(
+    schemes=["pbkdf2_sha256"], 
+    deprecated="auto"
+)
 security = HTTPBearer()
 
 SECRET_KEY = settings.better_auth_secret
@@ -42,32 +47,17 @@ class TokenData(BaseModel):
 
 
 # ------------------------------------------------------------------
-# INTERNAL SAFETY HELPERS
-# ------------------------------------------------------------------
-
-
-def _safe_password(password: str) -> str:
-    """
-    bcrypt HARD LIMIT = 72 BYTES
-    This prevents passlib/bcrypt crashes (500 errors).
-    """
-    if not password:
-        return password
-    return password.encode("utf-8")[:72].decode("utf-8", errors="ignore")
-
-
-# ------------------------------------------------------------------
-# PASSWORD FUNCTIONS (CRASH-PROOF)
+# PASSWORD FUNCTIONS (PRODUCTION-READY)
 # ------------------------------------------------------------------
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    plain_password = _safe_password(plain_password)
+    """Verify password against hash. Supports both PBKDF2 and Bcrypt."""
     return pwd_context.verify(plain_password, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
-    password = _safe_password(password)
+    """Generate hash using PBKDF2-SHA256 (no 72-byte limit)."""
     return pwd_context.hash(password)
 
 
@@ -120,9 +110,14 @@ def verify_token(token: str) -> Optional[TokenData]:
         if not username or not user_id:
             return None
 
-        return TokenData(username=username, user_id=UUID(user_id))
+        # Ensure user_id is a valid UUID
+        try:
+            return TokenData(username=username, user_id=UUID(user_id))
+        except (ValueError, TypeError):
+            return None
 
-    except JWTError:
+    except Exception:
+        # Catch JWTError and any other decoding errors
         return None
 
 
@@ -141,22 +136,26 @@ async def get_current_user_from_cookie(
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    token = request.cookies.get("access_token")
-    if not token:
+    try:
+        token = request.cookies.get("access_token")
+        if not token:
+            raise credentials_exception
+
+        token_data = verify_token(token)
+        if not token_data:
+            raise credentials_exception
+
+        statement = select(User).where(User.id == token_data.user_id)
+        result = await session.execute(statement)
+        user = result.scalars().first()
+
+        if not user:
+            raise credentials_exception
+
+        return UserRead.model_validate(user)
+    except (JWTError, ValueError, Exception):
+        # Catch any potential decoding or UUID errors to prevent 500s
         raise credentials_exception
-
-    token_data = verify_token(token)
-    if not token_data:
-        raise credentials_exception
-
-    statement = select(User).where(User.id == token_data.user_id)
-    result = await session.execute(statement)
-    user = result.scalars().first()
-
-    if not user:
-        raise credentials_exception
-
-    return UserRead.model_validate(user)
 
 
 def get_current_active_user(

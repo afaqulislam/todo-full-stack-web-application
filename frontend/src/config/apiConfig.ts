@@ -1,13 +1,5 @@
 // api.config.ts
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-if (!API_BASE_URL) {
-  throw new Error(
-    'NEXT_PUBLIC_API_BASE_URL is required but was not provided.'
-  );
-}
-
 /**
  * Normalize and validate API base URL
  * - Must be a valid http/https URL
@@ -18,11 +10,17 @@ const normalizeBaseUrl = (url: string): string => {
     const parsed = new URL(url);
     return parsed.origin; // guarantees protocol + host
   } catch {
-    throw new Error(`Invalid NEXT_PUBLIC_API_BASE_URL: ${url}`);
+    return url.replace(/\/+$/, ''); // Fallback for relative or malformed URLs
   }
 };
 
-const BASE_URL = normalizeBaseUrl(API_BASE_URL);
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+// In production (Vercel), we use a relative path to leverage the Next.js rewrite proxy.
+// This ensures cookies are treated as same-origin, fixing authentication issues.
+const BASE_URL = process.env.NODE_ENV === 'production'
+  ? ''
+  : normalizeBaseUrl(API_BASE_URL || 'http://localhost:8000');
 
 export const apiConfig = {
   baseUrl: BASE_URL,

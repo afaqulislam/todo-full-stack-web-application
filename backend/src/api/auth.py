@@ -55,33 +55,48 @@ async def login_user(
     """
     Login with email and password. Sets JWT in HTTP-only cookie.
     """
-    user = await authenticate_user(session, login_request.email, login_request.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
+    try:
+        user = await authenticate_user(session, login_request.email, login_request.password)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect email or password",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        # Create access token with user ID and email
+        access_token_expires = timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
+        access_token = create_access_token(
+            data={"sub": user.email, "user_id": str(user.id)},
+            expires_delta=access_token_expires,
         )
 
-    # Create access token with user ID and email
-    access_token_expires = timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
-    access_token = create_access_token(
-        data={"sub": user.email, "user_id": str(user.id)},
-        expires_delta=access_token_expires,
-    )
+        # Set the token in an HTTP-only cookie with expiry matching the JWT
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            secure=True,  # REQUIRED for HTTPS
+            samesite="none",  # REQUIRED for cross-origin cookies
+            max_age=ACCESS_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,  # convert days to seconds
+            path="/",
+            # domain=settings.cookie_domain, # Uncomment if cross-subdomain is needed
+        )
 
-    # Set the token in an HTTP-only cookie with expiry matching the JWT
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        httponly=True,
-        secure=True,  # REQUIRED
-        samesite="none",  # REQUIRED for localhost → hf.space
-        max_age=ACCESS_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,  # convert days to seconds
-        path="/",
-    )
-
-    return {"message": "Login successful", "user_id": str(user.id)}
+        return {
+            "message": "Login successful", 
+            "user_id": str(user.id),
+            "access_token": access_token
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        # Provide more context for development/production debugging
+        error_detail = f"Internal Server Error: {str(e)}"
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=error_detail
+        )
 
 
 # ------------------------------

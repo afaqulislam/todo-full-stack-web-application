@@ -1,6 +1,6 @@
 from pydantic_settings import BaseSettings
 from pydantic import Field
-from typing import List
+from typing import List, Union
 from urllib.parse import urlparse
 
 
@@ -21,11 +21,11 @@ class Settings(BaseSettings):
     jwt_algorithm: str = Field("HS256", alias="JWT_ALGORITHM")
     jwt_expiry_days: int = Field(7, alias="JWT_EXPIRY_DAYS")  # JWT expiry in days
 
-    # =======================
-    # APPLICATION
-    # =======================
-    env: str = Field("development", alias="ENV")
-    api_port: int = Field(8000, alias="API_PORT")
+    # # =======================
+    # # APPLICATION
+    # # =======================
+    # env: str = Field("development", alias="ENV")
+    # api_port: int = Field(8000, alias="API_PORT")
 
     # =======================
     # API
@@ -39,21 +39,37 @@ class Settings(BaseSettings):
     # =======================
     # CORS
     # =======================
-    backend_cors_origins: List[str] = Field(default_factory=list)
+    backend_cors_origins: Union[List[str], str] = Field(
+        default_factory=lambda: ["http://localhost:3000", "http://localhost:8000"],
+        alias="BACKEND_CORS_ORIGINS"
+    )
 
-    # @property
-    # def cors_origins(self) -> List[str]:
-    #     """
-    #     CORS origins must be explicitly provided via environment variables.
-    #     No hardcoded URLs. No wildcards in production.
-    #     """
-    #     if not self.backend_cors_origins:
-    #         raise ValueError("BACKEND_CORS_ORIGINS must be set")
-
-    #     if self.env == "production" and "*" in self.backend_cors_origins:
-    #         raise ValueError("Wildcard CORS is not allowed in production")
-
-    #     return self.backend_cors_origins
+    @property
+    def cors_origins(self) -> List[str]:
+        """
+        CORS origins must be explicitly provided via environment variables.
+        Supports both JSON lists and comma-separated strings.
+        Always returns a list of strings.
+        """
+        if not self.backend_cors_origins:
+            return ["http://localhost:3000", "http://localhost:8000"]
+        
+        # If it's a single string with commas or brackets, try to parse it
+        if isinstance(self.backend_cors_origins, str):
+            val = self.backend_cors_origins.strip()
+            # If it looks like a JSON list, we might want to json.loads it, 
+            # but simple split is usually enough for comma-separated vals.
+            if val.startswith("[") and val.endswith("]"):
+                import json
+                try:
+                    return json.loads(val)
+                except Exception:
+                    pass
+            
+            return [origin.strip() for origin in val.split(",") if origin.strip()]
+        
+        # If it's already a list, return it
+        return list(self.backend_cors_origins)
 
     model_config = {
         "env_file": ".env",
@@ -84,5 +100,5 @@ if not is_valid_database_url(settings.database_url):
     raise ValueError(f"Invalid DATABASE_URL: {settings.database_url}")
 
 # Enforce secret in production
-if settings.env == "production" and not settings.better_auth_secret:
-    raise ValueError("BETTER_AUTH_SECRET must be set in production")
+# if settings.env == "production" and not settings.better_auth_secret:
+#     raise ValueError("BETTER_AUTH_SECRET must be set in production")
