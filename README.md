@@ -51,7 +51,6 @@ todo-full-stack-web-application/
 │   │   ├── models/        # Database models
 │   │   ├── services/      # Business logic services
 │   │   └── main.py        # Application entry point
-│   ├── tests/             # Backend test suite
 │   ├── requirements.txt   # Python dependencies
 │   └── README.md          # Backend documentation
 ├── frontend/
@@ -74,19 +73,19 @@ Create a `.env` file in the backend directory with the following variables:
 
 ```env
 # DATABASE (PostgreSQL)
-DATABASE_URL=postgresql://username:password@localhost:5432/todo_db
+DATABASE_URL=put your NeonDB connection string OR API url here
 
 # AUTHENTICATION (JWT)
 BETTER_AUTH_SECRET=your-super-secret-jwt-key-change-in-production
 JWT_ALGORITHM=HS256
 JWT_EXPIRY_DAYS=7
-ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 # APPLICATION
-ENV=development
-API_PORT=8000
-API_DOCS_ENABLED=true
-BACKEND_CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+BACKEND_CORS_ORIGINS=put your frontend domain/link here
+
+# Frontend ENV
+NEXT_PUBLIC_API_BASE_URL=put your backend domain/link here
+
 ```
 
 ### Environment Variable Details
@@ -95,11 +94,10 @@ BACKEND_CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 - `BETTER_AUTH_SECRET`: Secret key for JWT signing (use a strong random key in production)
 - `JWT_ALGORITHM`: Algorithm used for JWT signing (HS256 recommended)
 - `JWT_EXPIRY_DAYS`: Number of days until JWT tokens expire
-- `ACCESS_TOKEN_EXPIRE_MINUTES`: Minutes until access tokens expire
 - `ENV`: Environment mode (development/production)
-- `API_PORT`: Port to run the API server on
-- `API_DOCS_ENABLED`: Whether to enable API documentation endpoints
 - `BACKEND_CORS_ORIGINS`: Comma-separated list of allowed origins for CORS
+- `NEXT_PUBLIC_API_BASE_URL`: Base URL for the backend API (used in frontend configuration)
+  
 
 ## 🚀 Installation & Setup
 
